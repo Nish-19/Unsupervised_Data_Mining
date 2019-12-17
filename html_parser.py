@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import bs4
-with open("htmls//Aishwarya_Lath_resume.html", 'rb') as fp:
+with open("htmls//Aditya_Malshikare_resume.html", 'rb') as fp:
     soup = BeautifulSoup(fp.read(), features = "lxml")
 
 #print(soup.body.contents)
@@ -21,7 +21,6 @@ body_contentes = soup.body.contents
 
 #for child in body_contentes[5].children:
 #    print(child)
-all_strings = []
 dict_data = []
 print(type(body_contentes[0]))
 for j in range(0, len(body_contentes)):
@@ -40,28 +39,32 @@ for j in range(0, len(body_contentes)):
                 except KeyError:
                     pass
                 inner.append(list(res[i].children))
+                print(inner)
             else:
                 print(res[i])
         
         #print(inner)
-        
+
         for k, object in enumerate(inner):
+            all_strings = ''
+            all_strings = all_strings.encode('utf-8')
             for string in object:
                 if type(string) == bs4.element.NavigableString:
-                    info = {}
-                    string = string.strip('\n')
-                    string = string.strip('\r')
-                    all_strings.append(string)
-                    try:
-                        info['String'] = string.encode('utf-8')
-                        info['Style'] = styles[k]
-                        info['DIV-STYLE'] = body_contentes[j]['style']
-                        #info[string] = styles[k]
-                        print(info)
-                        dict_data.append(info)
-                        #print(dict_data)
-                    except IndexError:
-                        pass
+                    string = string.encode('utf-8')
+                    all_strings = all_strings + string
+            info = {}
+            # string = string.strip('\n')
+            # string = string.strip('\r')
+            try:
+                info['String'] = all_strings
+                info['Style'] = styles[k]
+                info['DIV-STYLE'] = body_contentes[j]['style']
+                #info[string] = styles[k]
+                #print(info)
+                dict_data.append(info)
+                #print(dict_data)
+            except IndexError:
+                pass
                     #print(string)
 #print(all_strings)
 #print(info)
@@ -70,7 +73,7 @@ for j in range(0, len(body_contentes)):
 
 import csv
 csv_cloumns = ['String', 'Font Type','Font Style', 'Font Description','Font Size','position', ' border', ' writing-mode', ' left', ' top', ' width', ' height']
-csv_file = 'Aishwarya_Lath_resume.csv'
+csv_file = 'Aditya_Malshikare_resume.csv'
 try:
     with open(csv_file, 'w') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=csv_cloumns)
@@ -94,12 +97,16 @@ try:
             data['Font Description'] = font_description
             data['Font Size']=(src[len(src)-4:])
             lst=(data['DIV-STYLE'].split(';'))
+            print(lst)
             del data['DIV-STYLE']
             for i in range(0,len(lst)-1):
                 a = lst[i].split(':')
-                print(a)
+                #print(a)
                 data[str(a[0])]=str(a[1])
-            writer.writerow(data)
+            try:
+                writer.writerow(data)
+            except ValueError:
+                pass
 except IOError:
     print("I/O error")
 except UnicodeEncodeError:
