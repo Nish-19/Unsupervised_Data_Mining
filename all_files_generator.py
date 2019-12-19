@@ -7,11 +7,12 @@ Created on Sun Dec 15 10:48:46 2019
 
 import os
 
-path = 'D:/Text_mining/Htmls/htmls'
+path = 'D:/Text_mining/Htmls/samiran/samiran_resumes'
 
 files = []
-
+root = ''
 for r, d, f in os.walk(path):
+    root = r
     for file in f:
         if '.html' in file:
             files.append(file)
@@ -21,7 +22,8 @@ for f in files:
     print(f)
     from bs4 import BeautifulSoup
     import bs4
-    file_name = 'htmls//' + str(f)
+    file_name = os.path.join(root, f)
+    
     with open(file_name, 'rb') as fp:
         soup = BeautifulSoup(fp.read(), features = "lxml")
     
@@ -43,7 +45,6 @@ for f in files:
     
     #for child in body_contentes[5].children:
     #    print(child)
-    all_strings = []
     dict_data = []
     print(type(body_contentes[0]))
     for j in range(0, len(body_contentes)):
@@ -68,22 +69,25 @@ for f in files:
             #print(inner)
             
             for k, object in enumerate(inner):
+                all_strings = ''
+                all_strings = all_strings.encode('utf-8')
                 for string in object:
                     if type(string) == bs4.element.NavigableString:
-                        info = {}
-                        string = string.strip('\n')
-                        string = string.strip('\r')
-                        all_strings.append(string)
-                        try:
-                            info['String'] = string.encode('utf-8')
-                            info['Style'] = styles[k]
-                            info['DIV-STYLE'] = body_contentes[j]['style']
-                            #info[string] = styles[k]
-                            print(info)
-                            dict_data.append(info)
-                            #print(dict_data)
-                        except IndexError:
-                            pass
+                        string = string.encode('utf-8')
+                        all_strings = all_strings + string
+                info = {}
+                #string = string.strip('\n')
+                #string = string.strip('\r')
+                try:
+                    info['String'] = all_strings
+                    info['Style'] = styles[k]
+                    info['DIV-STYLE'] = body_contentes[j]['style']
+                    #info[string] = styles[k]
+                    print(info)
+                    dict_data.append(info)
+                    #print(dict_data)
+                except IndexError:
+                    pass
                         #print(string)
     #print(all_strings)
     #print(info)
@@ -92,7 +96,8 @@ for f in files:
     
     import csv
     csv_cloumns = ['String', 'Font Type','Font Style', 'Font Description','Font Size','position', ' border', ' writing-mode', ' left', ' top', ' width', ' height']
-    csv_file = str(f[:f.find('.html')]) + '.csv'
+    name = str(f[:f.find('.html')]) + '.csv'
+    csv_file = os.path.join(root, name)
     try:
         with open(csv_file, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=csv_cloumns)
@@ -123,7 +128,11 @@ for f in files:
                     a = lst[i].split(':')
                     print(a)
                     data[str(a[0])]=str(a[1])
-                writer.writerow(data)
+                try:
+                    writer.writerow(data)
+                except ValueError:
+                    print('Value Error')
+                    
     except IOError:
         print("I/O error")
     except UnicodeEncodeError:
